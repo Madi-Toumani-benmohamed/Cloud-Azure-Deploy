@@ -5,6 +5,12 @@
 *.tfstate
 *.tfstate.*
 
+# Others files
+
+*.terraform.*
+yes
+
+
 # Crash log files
 crash.log
 
