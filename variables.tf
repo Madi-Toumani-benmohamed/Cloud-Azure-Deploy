@@ -52,3 +52,9 @@ variable "default_user_name" {
 description = "Name of the default user"
 default = "adminuser"   
 }
+
+variable "source_image" {
+description = "les sources de l image"
+default =  ["Canonical","UbuntuServer","16.04-LTS","latest"]
+
+}

@@ -110,14 +110,14 @@ resource "azurerm_network_interface" "linux-vm-nic" {
 
 # création de la clé publique ssh
 
-
+/*
 resource "azurerm_ssh_public_key" "example" {
   name                = var.ssh_key_public_name
   resource_group_name = var.resource_group_name
   location            = var.location
   public_key          = file("~/.ssh/yes.pub")
 
-}
+}*/
 
 
 resource "azurerm_linux_virtual_machine" "VM" {
@@ -125,7 +125,7 @@ resource "azurerm_linux_virtual_machine" "VM" {
   resource_group_name = var.resource_group_name
   location            = var.location
   size                = "Standard_F2"
-  admin_username      = "adminuser"
+  admin_username      = var.default_user_name
   network_interface_ids = [azurerm_network_interface.linux-vm-nic.id]
  
   admin_ssh_key {
@@ -137,9 +137,9 @@ resource "azurerm_linux_virtual_machine" "VM" {
     storage_account_type = "Standard_LRS"
   }
   source_image_reference {
-    publisher = "Canonical"
-    offer     = "UbuntuServer"
-    sku       = "16.04-LTS"
-    version   = "latest"
+    publisher = var.source_image[0]
+    offer     = var.source_image[1]
+    sku       = var.source_image[2]
+    version   = var.source_image[3]
   }
 }
