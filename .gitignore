@@ -9,6 +9,7 @@
 
 *.terraform.*
 yes
+.terraform*
 
 
 # Crash log files
