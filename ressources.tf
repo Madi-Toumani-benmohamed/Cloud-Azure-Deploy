@@ -1,18 +1,11 @@
-# création de la ressource group
-
-resource "azurerm_resource_group" "terraform" {
-name = var.resource_group_name
-location = var.location
-
-}
 
 # création de la range d ip
 
 resource "azurerm_virtual_network" "net01" {
 name = var.reseau
 address_space = ["10.0.0.0/16"]
-location = azurerm_resource_group.terraform.location
-resource_group_name = azurerm_resource_group.terraform.name 
+location = var.location
+resource_group_name = var.rg_name
 
 }
 
@@ -22,7 +15,7 @@ resource "azurerm_subnet" "subnet" {
   name = var.subnet
   address_prefixes = var.subnet-cidr
   virtual_network_name = azurerm_virtual_network.net01.name
-  resource_group_name  = azurerm_resource_group.terraform.name
+  resource_group_name  = var.rg_name
 }
 
 # création de la security group
@@ -30,8 +23,8 @@ resource "azurerm_subnet" "subnet" {
 resource "azurerm_network_security_group" "linux-vm-nsg" {
     depends_on=[azurerm_virtual_network.net01]
     name                = var.nsg_name
-    location            = azurerm_resource_group.terraform.location
-    resource_group_name = azurerm_resource_group.terraform.name
+    location            = var.location
+    resource_group_name = var.rg_name
     
 
 }  
@@ -39,7 +32,7 @@ resource "azurerm_network_security_group" "linux-vm-nsg" {
 # création de la règle entrante pour le protocole ssh
 
 resource "azurerm_network_security_rule" "ssh" {
-    resource_group_name         = azurerm_resource_group.terraform.name
+    resource_group_name         = var.rg_name
     network_security_group_name = azurerm_network_security_group.linux-vm-nsg.name
     name                       = "AllowSSH"
     description                = "Allow SSH"
@@ -59,7 +52,7 @@ resource "azurerm_network_security_rule" "ssh" {
 resource "azurerm_network_security_rule" "http" {
 
 
-    resource_group_name         = azurerm_resource_group.terraform.name
+    resource_group_name         = var.rg_name
     network_security_group_name = azurerm_network_security_group.linux-vm-nsg.name
     name                         = "AllowHTTP"
     description                = "Allow HTTP"
@@ -87,9 +80,10 @@ resource "azurerm_subnet_network_security_group_association" "linux-vm-nsg-assoc
 
 resource "azurerm_public_ip" "linux-vm-ip" {
   depends_on=[azurerm_virtual_network.net01]
-  name                = var.ip_public_name
-  location            = azurerm_resource_group.terraform.location
-  resource_group_name = azurerm_resource_group.terraform.name
+  count               = var.nombre
+  name                = "ippubname${count.index}"
+  location            = var.location
+  resource_group_name = var.rg_name
   allocation_method   = "Static"
 }
 
@@ -97,14 +91,16 @@ resource "azurerm_public_ip" "linux-vm-ip" {
 
 resource "azurerm_network_interface" "linux-vm-nic" {
   depends_on=[azurerm_subnet.subnet]
-  name                = var.nic_name
-  location            = azurerm_resource_group.terraform.location
-  resource_group_name = azurerm_resource_group.terraform.name
+  count               = var.nombre 
+  name                = "nicname${count.index}"
+  location            = var.location
+  resource_group_name = var.rg_name
     ip_configuration {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.subnet.id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = azurerm_public_ip.linux-vm-ip.id
+    #public_ip_address_id          = [element(azurerm_public_ip.linux-vm-ip.id.*.id, count.index)]
+    public_ip_address_id          = azurerm_public_ip.linux-vm-ip[count.index].id
   }
 }
 
@@ -121,12 +117,13 @@ resource "azurerm_ssh_public_key" "example" {
 
 
 resource "azurerm_linux_virtual_machine" "VM" {
-  name                = var.vm_name
-  resource_group_name = var.resource_group_name
+  count               = var.nombre
+  name                = "vmname${count.index}"
+  resource_group_name = var.rg_name
   location            = var.location
   size                = "Standard_F2"
   admin_username      = var.default_user_name
-  network_interface_ids = [azurerm_network_interface.linux-vm-nic.id]
+  network_interface_ids = [element(azurerm_network_interface.linux-vm-nic.*.id, count.index)]
  
   admin_ssh_key {
     username   = var.default_user_name

@@ -1,11 +1,8 @@
-variable "resource_group_name" {
-description = "Name of the environment"
-default = "terraform"
-}
 variable "location" {
 description = "Azure location to use"
 default = "AustraliaEast"
 }
+
 variable "reseau" {
 description = "Azure network to use"
 default = "net01"
@@ -57,4 +54,14 @@ variable "source_image" {
 description = "les sources de l image"
 default =  ["Canonical","UbuntuServer","16.04-LTS","latest"]
 
+}
+
+variable "nombre" {
+description = "nombre"
+default = 1
+}
+
+variable "rg_name" {
+description = "nom de la ressource groupe"
+default =  "terraform"  
 }
