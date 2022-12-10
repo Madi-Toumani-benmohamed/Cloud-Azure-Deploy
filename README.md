@@ -1,3 +1,3 @@
 # terraform
 terraform project with Azur cloud 
-this is a test project
+this is a project for build a virtual machine
