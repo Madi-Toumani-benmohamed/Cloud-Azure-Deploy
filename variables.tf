@@ -8,6 +8,12 @@ description = "Azure network to use"
 default = "net01"
 }
 
+variable "address_space" {
+description = "Azur adress space"
+default = ["10.0.0.0/16"]
+}
+
+
 variable "subnet" {
 description = "Azur subnet to use"
 default = "subnet"
